@@ -218,8 +218,8 @@
 
 ## Этап 3: Frontend - Настройка Next.js для блога (2-3 дня)
 
-### 3.1 Инициализация Next.js проекта
-- [ ] Создать Next.js проект: `npx create-next-app@latest frontend --typescript --tailwind --app`
+### 3.1 Инициализация Next.js проекта ✅
+- [x] Создать Next.js проект: `npx create-next-app@latest frontend --typescript --tailwind --app` ✅
 - [x] Создать базовую frontend конфигурацию:
   - `package.json` с зависимостями блога ✅
   - `@tiptap/react` `@tiptap/starter-kit` для редактора ✅
@@ -228,44 +228,49 @@
   - `react-hook-form` `zod` для форм ✅
 - [x] Настроить ESLint (max-lines: 100, max-lines-per-function: 20) ✅
 - [x] Настроить TypeScript конфигурацию с абсолютными импортами ✅
-- ✅ Настроить `tailwind.config.js` с DaisyUI и кастомной палитрой
-- [ ] Настроить базовую структуру папок в `app/`
+- [x] Настроить `tailwind.config.js` с DaisyUI и кастомной палитрой ✅
+- [x] Настроить `styles/globals.css` с кастомными стилями блога ✅
+- [ ] Настроить базовую структуру папок в `app/` (этап 3.6)
 
-### 3.2 Настройка инфраструктуры (микромодули)
-- [ ] Создать API клиенты для блога (микромодули):
-  - `lib/api/articles.ts` - CRUD статей
-  - `lib/api/authors.ts` - авторы и профили
-  - `lib/api/comments.ts` - комментарии
-  - `lib/api/subscriptions.ts` - подписки
-  - `lib/api/payments.ts` - платежи
-  - `lib/api/search.ts` - поиск контента
-  - `lib/api/analytics.ts` - аналитика
-- [ ] Настроить React Query Provider
+### 3.2 Настройка инфраструктуры (микромодули) ✅
+- [x] Создать API клиенты для блога (микромодули):
+  - `lib/api/articles.ts` - CRUD статей ✅
+  - `lib/api/categories.ts` - категории ✅
+  - `lib/api/tags.ts` - теги ✅
+  - `lib/api/comments.ts` - комментарии ✅
+  - `lib/api/subscriptions.ts` - подписки ✅
+  - `lib/api/client.ts` - базовый HTTP клиент ✅
+  - [ ] `lib/api/payments.ts` - платежи (этап 7)
+  - [ ] `lib/api/search.ts` - поиск контента (этап 8)
+  - [ ] `lib/api/analytics.ts` - аналитика (этап 8)
+- [ ] Настроить React Query Provider (этап 3.6)
 - [x] Создать TypeScript типы для блога (микромодули):
   - `types/Article.ts` ✅
   - `types/User.ts` ✅  
   - `types/Author.ts` ✅
+  - `types/Category.ts` ✅
+  - `types/Tag.ts` ✅
+  - `types/Comment.ts` ✅
+  - `types/Subscription.ts` ✅
+  - `types/Components.ts` ✅
   - `types/index.ts` ✅ (экспорт всех типов)
-  - [ ] `types/comment.ts`
-  - [ ] `types/subscription.ts`
-  - [ ] `types/analytics.ts`
 
-### 3.3 Утилиты для блога (микромодули)
-- [ ] `lib/utils/editor.ts` - утилиты редактора (форматирование, экспорт)
-- [ ] `lib/utils/monetization.ts` - расчет доходов и цен
-- [ ] `lib/utils/seo.ts` - генерация метатегов
-- [ ] `lib/utils/analytics.ts` - трекинг событий читателей
-- [ ] `lib/utils/formatting.ts` - форматирование дат, чисел, текста
-- [ ] `lib/utils/content.ts` - обработка контента (excerpt, время чтения)
+### 3.3 Утилиты для блога (микромодули) ✅
+- [x] `lib/utils/editor.ts` - утилиты редактора (форматирование, экспорт) ✅
+- [x] `lib/utils/monetization.ts` - расчет доходов и цен ✅
+- [x] `lib/utils/seo.ts` - генерация метатегов ✅
+- [x] `lib/utils/analytics.ts` - трекинг событий читателей ✅
+- [x] `lib/utils/formatting.ts` - форматирование дат, чисел, текста ✅
+- [x] `lib/utils/content.ts` - обработка контента (excerpt, время чтения) ✅
 
-### 3.4 React хуки для блога (микромодули)
-- [ ] `hooks/useArticles.ts` - работа со статьями
-- [ ] `hooks/useComments.ts` - комментарии
-- [ ] `hooks/useSubscriptions.ts` - подписки
-- [ ] `hooks/usePayments.ts` - платежи
-- [ ] `hooks/useAnalytics.ts` - аналитика для авторов
-- [ ] `hooks/useSearch.ts` - поиск с debounce
-- [ ] `hooks/useReadingProgress.ts` - прогресс чтения статьи
+### 3.4 React хуки для блога (микромодули) ✅
+- [x] `hooks/useArticles.ts` - работа со статьями ✅
+- [x] `hooks/useComments.ts` - комментарии ✅
+- [x] `hooks/useSubscriptions.ts` - подписки ✅
+- [ ] `hooks/usePayments.ts` - платежи (планируется в этапе 7)
+- [ ] `hooks/useAnalytics.ts` - аналитика для авторов (планируется в этапе 8)
+- [x] `hooks/useSearch.ts` - поиск с debounce ✅
+- [x] `hooks/useReadingProgress.ts` - прогресс чтения статьи ✅
 
 ### 3.5 Базовые UI компоненты (строго по принципам микромодулей)
 - [x] `components/ui/Button/` - полная структура модуля:
@@ -292,18 +297,37 @@
 - [ ] Добавить интерактивные controls для props
 - [ ] Документировать все варианты и состояния компонентов
 
-### 3.6 Базовая структура блога
-- [ ] Создать layout с header и footer для блога
-- [ ] Создать страницы:
-  - `/` - главная с лентой статей
-  - `/article/[slug]` - страница статьи
-  - `/author/[username]` - профиль автора
-  - `/category/[slug]` - статьи категории
-  - `/tag/[slug]` - статьи по тегу
-  - `/write` - создание/редактирование статьи
-  - `/dashboard` - личный кабинет автора
-  - `/settings` - настройки профиля
-- [ ] Создать навигацию с поиском и фильтрами
+### 3.6 Базовая структура блога (ТЕКУЩИЙ ЭТАП)
+**Цель**: Создать основную структуру Next.js App Router с layout компонентами
+
+#### 3.6.1 Layout система (микромодули)
+- [ ] `components/layout/Header.tsx` - шапка сайта с навигацией
+- [ ] `components/layout/Footer.tsx` - подвал сайта
+- [ ] `components/layout/PageLayout.tsx` - общий layout страниц
+- [ ] `components/layout/BlogLayout.tsx` - специальный layout для блога
+- [ ] `app/layout.tsx` - корневой layout с провайдерами
+
+#### 3.6.2 Основные страницы (App Router)
+- [ ] `app/page.tsx` - главная с лентой статей
+- [ ] `app/article/[slug]/page.tsx` - страница статьи
+- [ ] `app/author/[username]/page.tsx` - профиль автора
+- [ ] `app/category/[slug]/page.tsx` - статьи категории
+- [ ] `app/tag/[slug]/page.tsx` - статьи по тегу
+- [ ] `app/write/page.tsx` - создание/редактирование статьи
+- [ ] `app/dashboard/page.tsx` - личный кабинет автора
+- [ ] `app/settings/page.tsx` - настройки профиля
+
+#### 3.6.3 Компоненты навигации (микромодули)
+- [ ] `components/navigation/MainNav.tsx` - основная навигация
+- [ ] `components/navigation/SearchBar.tsx` - поиск с автодополнением
+- [ ] `components/navigation/CategoryMenu.tsx` - меню категорий
+- [ ] `components/navigation/UserMenu.tsx` - меню пользователя
+- [ ] `components/navigation/Breadcrumbs.tsx` - хлебные крошки
+
+#### 3.6.4 React Query Provider Setup
+- [ ] `lib/providers/QueryProvider.tsx` - настройка React Query
+- [ ] `lib/providers/ThemeProvider.tsx` - темная/светлая тема
+- [ ] Интеграция провайдеров в корневой layout
 
 ### 3.7 Система аутентификации для блога (микромодули)
 - [ ] `components/auth/LoginForm.tsx` - форма логина
