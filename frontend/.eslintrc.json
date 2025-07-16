@@ -1,0 +1,80 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    // Микромодульная архитектура - ограничения размера
+    "max-lines": ["error", { 
+      "max": 100, 
+      "skipBlankLines": true, 
+      "skipComments": true 
+    }],
+    "max-lines-per-function": ["error", { 
+      "max": 20, 
+      "skipBlankLines": true, 
+      "skipComments": true 
+    }],
+    "max-params": ["error", 4],
+    "complexity": ["error", 10],
+    
+    // Именованные экспорты предпочтительнее default
+    "import/prefer-default-export": "off",
+    "import/no-default-export": "off",
+    
+    // TypeScript strict rules
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    
+    // React best practices
+    "react/prop-types": "off",
+    "react/display-name": "off",
+    "react/react-in-jsx-scope": "off",
+    
+    // Безопасность
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    
+    // Качество кода
+    "prefer-const": "error",
+    "no-var": "error",
+    "object-shorthand": "error",
+    "prefer-arrow-callback": "error"
+  },
+  "overrides": [
+    {
+      // Исключения для конфигурационных файлов
+      "files": [
+        "*.config.js",
+        "*.config.ts", 
+        "next.config.js",
+        "tailwind.config.js",
+        "jest.config.js"
+      ],
+      "rules": {
+        "max-lines": "off",
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      // Исключения для страниц Next.js (требуют default export)
+      "files": ["app/**/*.tsx", "pages/**/*.tsx"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      // Исключения для тестов
+      "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "rules": {
+        "max-lines-per-function": "off",
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ]
+} 
