@@ -1,0 +1,539 @@
+# МИКРОМОДУЛЬНАЯ АРХИТЕКТУРА - ОСНОВНЫЕ ПРИНЦИПЫ
+
+## 1. РАЗМЕР И ОТВЕТСТВЕННОСТЬ МОДУЛЕЙ
+- **Один файл = одна ответственность** (принцип Single Responsibility)
+- **Максимум 50-100 строк кода** на файл (исключения: конфиги, типы)
+- **Если файл превышает 100 строк** - разбивать на подмодули
+- **Минимум зависимостей** между модулями
+
+## 2. СТРУКТУРА FRONTEND ПРОЕКТОВ (Next.js/React)
+
+### Обязательные папки:
+```
+/components/
+  /ui/           # Базовые UI компоненты (Button, Input, Modal)
+  /forms/        # Формы и их валидация
+  /layout/       # Header, Footer, Sidebar
+  /features/     # Бизнес-логика компонентов
+  
+/lib/
+  /api/          # API клиенты и запросы
+  /utils/        # Утилитарные функции
+  /validation/   # Схемы валидации (Zod, Yup)
+  /constants/    # Константы приложения
+  
+/hooks/          # Кастомные React хуки
+/types/          # TypeScript типы и интерфейсы
+/store/          # Состояние приложения (Zustand, Redux)
+```
+
+### Правила именования:
+- **Компоненты**: PascalCase (UserProfile.tsx)
+- **Хуки**: camelCase с префиксом use (useUserData.ts)
+- **Утилиты**: camelCase (formatDate.ts)
+- **Типы**: PascalCase с суффиксом Type (UserType.ts)
+
+## 3. СТРУКТУРА BACKEND ПРОЕКТОВ (Node.js/Strapi)
+
+### Обязательные папки:
+```
+/api/
+  /controllers/  # Контроллеры API
+  /services/     # Бизнес-логика
+  /middlewares/  # Промежуточные обработчики
+  /routes/       # Маршруты API
+  
+/utils/
+  /validation/   # Валидация данных
+  /auth/         # Аутентификация и авторизация
+  /helpers/      # Вспомогательные функции
+  
+/config/         # Конфигурационные файлы
+/types/          # TypeScript типы
+```
+
+## 4. ПРИНЦИПЫ РАЗРАБОТКИ
+
+### A. Декомпозиция функций:
+- **Одна функция = одна задача**
+- **Максимум 20 строк** на функцию
+- **Чистые функции** где возможно (без побочных эффектов)
+- **Явные зависимости** через параметры
+
+### B. Компонентный подход:
+- **Атомарные компоненты** (Button, Input, Text)
+- **Молекулярные компоненты** (SearchBar, UserCard)
+- **Организменные компоненты** (Header, ProductList)
+- **Шаблонные компоненты** (PageLayout, FormLayout)
+
+### C. Управление состоянием:
+- **Локальное состояние** - useState в компоненте
+- **Глобальное состояние** - отдельные store модули
+- **Серверное состояние** - отдельные API хуки
+- **Форма состояния** - отдельные form хуки
+
+## 5. ОБЯЗАТЕЛЬНЫЕ ФАЙЛЫ В КАЖДОМ МОДУЛЕ
+
+### Для компонентов:
+```typescript
+// Component.tsx - основной компонент
+// Component.types.ts - типы компонента
+// Component.test.tsx - тесты (опционально)
+// index.ts - экспорт компонента
+```
+
+### Для API модулей:
+```typescript
+// api.ts - API функции
+// types.ts - типы данных
+// validation.ts - схемы валидации
+// constants.ts - константы модуля
+```
+
+## 6. ИМПОРТЫ И ЭКСПОРТЫ
+
+### Правила импортов:
+- **Абсолютные импорты** для внутренних модулей
+- **Относительные импорты** только для соседних файлов
+- **Группировка импортов**: библиотеки → внутренние → относительные
+- **Именованные экспорты** предпочтительнее default
+
+### Пример:
+```typescript
+// ✅ Правильно
+import { useState } from 'react'
+import { Button } from '@/components/ui'
+import { UserType } from '@/types'
+import { validateUser } from './validation'
+
+// ❌ Неправильно
+import React, { useState } from 'react'
+import Button from '../../components/ui/Button'
+import { UserType } from '../../../types/user'
+```
+
+## 7. ОБРАБОТКА ОШИБОК И ВАЛИДАЦИЯ
+
+### Принципы:
+- **Каждый модуль** обрабатывает свои ошибки
+- **Валидация данных** на входе в модуль
+- **Типизация ошибок** через TypeScript
+- **Логирование ошибок** в отдельном модуле
+
+### Структура:
+```typescript
+// errors/
+//   /types.ts        # Типы ошибок
+//   /handlers.ts     # Обработчики ошибок
+//   /validation.ts   # Валидация
+//   /logger.ts       # Логирование
+```
+
+## 8. ТЕСТИРОВАНИЕ МОДУЛЕЙ
+
+### Обязательные тесты:
+- **Unit тесты** для каждой функции
+- **Integration тесты** для API
+- **Component тесты** для UI
+- **E2E тесты** для критических путей
+
+### Структура тестов:
+```
+/tests/
+  /unit/           # Модульные тесты
+  /integration/    # Интеграционные тесты
+  /e2e/           # End-to-end тесты
+  /mocks/         # Моки для тестов
+```
+
+## 9. ДОКУМЕНТАЦИЯ МОДУЛЕЙ
+
+### Обязательные комментарии:
+- **JSDoc** для всех публичных функций
+- **README.md** для сложных модулей
+- **Примеры использования** в комментариях
+- **Описание зависимостей** модуля
+
+### Пример:
+```typescript
+/**
+ * Валидирует данные пользователя
+ * @param userData - данные пользователя
+ * @returns объект с результатом валидации
+ * @example
+ * const result = validateUser({ name: 'John', email: 'john@example.com' })
+ */
+export function validateUser(userData: UserInput): ValidationResult {
+  // implementation
+}
+```
+
+## 10. ПРОИЗВОДИТЕЛЬНОСТЬ И ОПТИМИЗАЦИЯ
+
+### Принципы:
+- **Lazy loading** для больших модулей
+- **Code splitting** по функциональности
+- **Мемоизация** для тяжелых вычислений
+- **Избегание re-renders** в React
+
+### Инструменты:
+- **React.memo** для компонентов
+- **useMemo/useCallback** для оптимизации
+- **Dynamic imports** для ленивой загрузки
+
+## 11. СОВМЕСТНАЯ РАБОТА С AI
+
+### Для эффективной работы с AI:
+- **Четкие имена** файлов и функций
+- **Минимальные зависимости** между модулями
+- **Явные интерфейсы** между модулями
+- **Подробные типы** TypeScript
+
+### Структура запросов к AI:
+1. **Контекст**: какой модуль редактируем
+2. **Задача**: что нужно сделать
+3. **Ограничения**: размер, зависимости
+4. **Интерфейс**: входы и выходы
+
+## 12. ИНСТРУМЕНТЫ И АВТОМАТИЗАЦИЯ
+
+### Обязательные инструменты:
+- **ESLint** с правилами для микромодулей
+- **Prettier** для форматирования
+- **TypeScript** в строгом режиме
+- **Husky** для pre-commit хуков
+
+### Скрипты в package.json:
+```json
+{
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "build": "next build",
+    "analyze": "npm run build && npx @next/bundle-analyzer"
+  }
+}
+```
+
+## 13. РЕФАКТОРИНГ И ПОДДЕРЖКА
+
+### Признаки необходимости рефакторинга:
+- **Файл > 100 строк**
+- **Функция > 20 строк**
+- **Более 3 уровней вложенности**
+- **Дублирование кода**
+- **Сложные зависимости**
+
+### Процесс рефакторинга:
+1. **Выделить** общую логику
+2. **Создать** новый модуль
+3. **Написать** тесты
+4. **Заменить** использование
+5. **Удалить** старый код
+
+## 14. БЕЗОПАСНОСТЬ МОДУЛЕЙ
+
+### Принципы:
+- **Валидация** всех входящих данных
+- **Санитизация** пользовательского ввода
+- **Минимальные права** доступа
+- **Изоляция** критичных модулей
+
+### Инструменты:
+- **Zod/Yup** для валидации
+- **Helmet** для безопасности заголовков
+- **Rate limiting** для API
+- **CORS** настройки
+
+## 15. МОНИТОРИНГ И ЛОГИРОВАНИЕ
+
+### Структура логирования:
+```typescript
+// logging/
+//   /logger.ts       # Основной логгер
+//   /formatters.ts   # Форматирование логов
+//   /transports.ts   # Транспорты логов
+```
+
+### Уровни логирования:
+- **ERROR** - ошибки
+- **WARN** - предупреждения
+- **INFO** - информация
+- **DEBUG** - отладка
+
+---
+
+## ЧЕКЛИСТ СОЗДАНИЯ МОДУЛЯ
+
+### ✅ Перед созданием:
+- [ ] Определена единственная ответственность
+- [ ] Продуманы входы и выходы
+- [ ] Минимизированы зависимости
+- [ ] Выбрано подходящее место в структуре
+
+### ✅ При создании:
+- [ ] Размер файла < 100 строк
+- [ ] Функции < 20 строк
+- [ ] Добавлены типы TypeScript
+- [ ] Написаны JSDoc комментарии
+- [ ] Добавлена валидация входных данных
+
+### ✅ После создания:
+- [ ] Написаны unit тесты
+- [ ] Проверена интеграция с другими модулями
+- [ ] Обновлена документация
+- [ ] Проведен code review
+
+## 16. ПРИНЦИПЫ ELEGANT OBJECTS (АДАПТИРОВАННЫЕ ДЛЯ NEXT.JS)
+
+### A. Immutable Data Structures (Неизменяемые структуры данных)
+- **Все состояние** должно быть неизменяемым
+- **React state** обновляется через новые объекты
+- **Избегаем мутаций** массивов и объектов
+- **Используем spread operator** и методы типа map/filter
+
+### Примеры:
+```typescript
+// ✅ Правильно - immutable updates
+const updateArticle = (article: Article, updates: Partial<Article>): Article => ({
+  ...article,
+  ...updates,
+  tags: article.tags.map(tag => 
+    tag.id === updates.tagId ? { ...tag, ...updates } : tag
+  )
+});
+
+// ❌ Неправильно - мутация
+const updateArticle = (article: Article, updates: Partial<Article>) => {
+  article.title = updates.title; // мутация!
+  return article;
+};
+```
+
+### B. Композиция вместо наследования
+- **Предпочитаем композицию** классов и компонентов
+- **Избегаем extends** в пользу интерфейсов
+- **Инжектим зависимости** через пропсы/параметры
+- **Переиспользуем через композицию**
+
+### Примеры:
+```typescript
+// ✅ Правильно - композиция
+interface ArticleCardProps {
+  readonly article: Article;
+  readonly readingTimeCalculator: ReadingTimeCalculator;
+  readonly seoGenerator: SeoGenerator;
+  readonly formatter: DateFormatter;
+}
+
+// ❌ Неправильно - наследование
+class ArticleCard extends BaseCard {
+  // слишком жесткая связь
+}
+```
+
+### C. Избегание null/undefined
+- **Используем Optional types** вместо null
+- **Явные проверки** на существование
+- **Default values** для всех опциональных параметров
+- **Maybe/Option patterns** для безопасности
+
+### Примеры:
+```typescript
+// ✅ Правильно - Optional pattern
+type Maybe<T> = T | undefined;
+
+const findArticle = (slug: string): Maybe<Article> => {
+  return articles.find(a => a.slug === slug);
+};
+
+const articleTitle = findArticle(slug)?.title ?? 'Статья не найдена';
+
+// ❌ Неправильно - null возвращение
+const findArticle = (slug: string): Article | null => {
+  return articles.find(a => a.slug === slug) || null;
+};
+```
+
+### D. Интерфейсы для всех публичных API
+- **Каждый модуль** имеет четкий интерфейс
+- **Типизация всех функций** и их параметров
+- **Контракты поведения** через TypeScript
+- **Явные зависимости** в интерфейсах
+
+### Примеры:
+```typescript
+// ✅ Правильно - явные интерфейсы
+export interface ArticleService {
+  findByCategory(categorySlug: string, limit: number): Promise<Article[]>;
+  calculateReadingTime(article: Article): ReadingTime;
+  updateContent(articleId: string, updates: ArticleUpdate): Promise<Article>;
+}
+
+export interface ReadingTimeCalculator {
+  calculate(content: string, wordsPerMinute: number): number;
+}
+
+// ❌ Неправильно - неявные зависимости
+export const updateArticleContent = (data: any) => {
+  // что за data? какой тип возврата?
+};
+```
+
+### E. Маленькие сфокусированные классы/функции
+- **Одна функция = одна задача** (уже есть в п.4)
+- **Классы-утилиты** разбиваем на отдельные функции
+- **Избегаем God Objects** и Utility Classes
+- **Четкая ответственность** каждого модуля
+
+### Примеры:
+```typescript
+// ✅ Правильно - специализированные функции
+export const calculateReadingTime = (
+  content: string, 
+  wordsPerMinute: number = 200
+): number => {
+  const wordCount = content.split(/\s+/).length;
+  return Math.ceil(wordCount / wordsPerMinute);
+};
+
+export const formatPublishDate = (date: Date): string => {
+  return new Intl.DateTimeFormat('ru-RU', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+};
+
+// ❌ Неправильно - God Object
+class ArticleUtils {
+  static calculateReadingTime() { }
+  static formatDate() { }
+  static validateEmail() { }
+  static generateSlug() { }
+  static sendNotification() { }
+  // слишком много ответственностей!
+}
+```
+
+### F. Явные зависимости (Dependency Injection)
+- **Все зависимости** передаются через параметры
+- **Избегаем скрытых зависимостей** и глобальных переменных
+- **Мокируемые зависимости** для тестирования
+- **Инверсия контроля** через интерфейсы
+
+### Примеры:
+```typescript
+// ✅ Правильно - явные зависимости
+export const createArticleSearchService = (
+  apiClient: ApiClient,
+  searchEngine: SearchEngine,
+  readingTimeCalculator: ReadingTimeCalculator
+): ArticleSearchService => ({
+  async searchByKeyword(keyword: string, filters: SearchFilters) {
+    const articles = await apiClient.getArticles(filters);
+    return articles.map(article => ({
+      ...article,
+      relevanceScore: searchEngine.calculateRelevance(keyword, article.content),
+      readingTime: readingTimeCalculator.calculate(article.content)
+    }));
+  }
+});
+
+// ❌ Неправильно - скрытые зависимости
+export const searchArticles = async (keyword: string) => {
+  const articles = await api.getArticles(); // откуда api?
+  return articles.map(article => ({
+    ...article,
+    readingTime: ContentUtils.calculateReadingTime(article.content) // статическая зависимость
+  }));
+};
+```
+
+### G. Адаптированные правила для Next.js/React
+
+#### Разрешенные исключения из EO:
+- **React hooks** (useState, useEffect) - необходимы для React
+- **Static utility functions** - полезны для форматирования и валидации  
+- **Strapi API calls** - ORM необходим для бэкенда
+- **Getters/setters в формах** - React Hook Form требует этого
+
+#### Строгие правила:
+- **No mutation** - всегда immutable updates
+- **No null** - используем Maybe<T> и optional chaining
+- **Composition** - предпочитаем композицию наследованию
+- **Small modules** - максимум 100 строк на файл
+
+### H. Практические примеры применения
+
+#### Создание компонента в EO стиле:
+```typescript
+// components/reader/ArticleCard.tsx
+interface ArticleCardProps {
+  readonly article: Article;
+  readonly readingTimeCalculator: ReadingTimeCalculator;
+  readonly onSelect?: (article: Article) => void;
+}
+
+export const ArticleCard: React.FC<ArticleCardProps> = ({
+  article,
+  readingTimeCalculator,
+  onSelect
+}) => {
+  const readingTime = readingTimeCalculator.calculate(
+    article.content, 
+    200 // words per minute
+  );
+
+  const handleClick = () => {
+    onSelect?.(article);
+  };
+
+  return (
+    <div onClick={handleClick} className="article-card">
+      <h3>{article.title}</h3>
+      <span>{readingTime} мин чтения</span>
+    </div>
+  );
+};
+```
+
+#### API модуль в EO стиле:
+```typescript
+// lib/api/articles.ts
+export interface ArticleApiClient {
+  findByCategory(params: SearchParams): Promise<Article[]>;
+  getBySlug(slug: string): Promise<Maybe<Article>>;
+  update(id: string, updates: ArticleUpdate): Promise<Article>;
+}
+
+export const createArticleApiClient = (
+  httpClient: HttpClient
+): ArticleApiClient => ({
+  async findByCategory(params: SearchParams): Promise<Article[]> {
+    const response = await httpClient.get('/articles/search', { params });
+    return response.data.map(transformArticleFromApi);
+  },
+
+  async getBySlug(slug: string): Promise<Maybe<Article>> {
+    try {
+      const response = await httpClient.get(`/articles/${slug}`);
+      return transformArticleFromApi(response.data);
+    } catch (error) {
+      if (error.status === 404) return undefined;
+      throw error;
+    }
+  },
+
+  async update(id: string, updates: ArticleUpdate): Promise<Article> {
+    const response = await httpClient.put(`/articles/${id}`, updates);
+    return transformArticleFromApi(response.data);
+  }
+});
+```
+
+---
+
+**ПОМНИ**: Микромодульность - это не самоцель, а средство для создания поддерживаемого, тестируемого и масштабируемого кода. Каждый модуль должен решать конкретную задачу максимально просто и эффективно. 
