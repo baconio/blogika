@@ -1,0 +1,44 @@
+{
+  "collectionName": "components_monetization_payment_infos",
+  "info": {
+    "displayName": "Payment Info",
+    "description": "Информация о платежах и выплатах"
+  },
+  "options": {},
+  "attributes": {
+    "payment_system": {
+      "type": "enumeration",
+      "enum": ["yukassa", "cloudpayments", "stripe", "paypal", "sbp"],
+      "required": true
+    },
+    "external_id": {
+      "type": "string",
+      "required": true
+    },
+    "amount": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "RUB",
+      "maxLength": 3
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "processing", "succeeded", "failed", "cancelled"],
+      "default": "pending"
+    },
+    "payment_method": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+} 

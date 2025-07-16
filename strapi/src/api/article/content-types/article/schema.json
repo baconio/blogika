@@ -1,0 +1,113 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "singularName": "article",
+    "pluralName": "articles",
+    "displayName": "Article",
+    "description": "Статьи блога с монетизацией"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "minLength": 10
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "excerpt": {
+      "type": "text",
+      "maxLength": 500
+    },
+    "cover_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "author": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::author.author",
+      "inversedBy": "articles",
+      "required": true
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne", 
+      "target": "api::category.category",
+      "inversedBy": "articles"
+    },
+    "tags": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::tag.tag",
+      "inversedBy": "articles"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "published", "scheduled", "premium"],
+      "default": "draft"
+    },
+    "access_level": {
+      "type": "enumeration", 
+      "enum": ["free", "premium", "subscription_only"],
+      "default": "free"
+    },
+    "price": {
+      "type": "decimal",
+      "min": 0
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "reading_time": {
+      "type": "integer",
+      "min": 1
+    },
+    "views_count": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "likes_count": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "comments_count": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "shares_count": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "published_at_custom": {
+      "type": "datetime"
+    },
+    "scheduled_at": {
+      "type": "datetime"
+    },
+    "seo_meta": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.seo-meta"
+    }
+  }
+} 

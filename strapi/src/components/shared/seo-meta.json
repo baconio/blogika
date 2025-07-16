@@ -1,0 +1,33 @@
+{
+  "collectionName": "components_shared_seo_metas",
+  "info": {
+    "displayName": "SEO Meta",
+    "description": "SEO метаданные для статей"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "maxLength": 60,
+      "minLength": 30
+    },
+    "description": {
+      "type": "text",
+      "maxLength": 160,
+      "minLength": 120
+    },
+    "keywords": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "og_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "canonical_url": {
+      "type": "string"
+    }
+  }
+} 

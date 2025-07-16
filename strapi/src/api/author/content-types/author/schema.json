@@ -1,0 +1,78 @@
+{
+  "kind": "collectionType",
+  "collectionName": "authors", 
+  "info": {
+    "singularName": "author",
+    "pluralName": "authors",
+    "displayName": "Author",
+    "description": "Авторы блога с монетизацией"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "display_name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "minLength": 2
+    },
+    "bio": {
+      "type": "richtext",
+      "maxLength": 1000
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "cover_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "social_links": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.social-links"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "subscriber_count": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "total_earnings": {
+      "type": "decimal",
+      "default": 0.00,
+      "min": 0
+    },
+    "subscription_price": {
+      "type": "decimal",
+      "min": 0
+    },
+    "content_access_level": {
+      "type": "enumeration",
+      "enum": ["free", "premium", "subscription"],
+      "default": "free"
+    },
+    "articles": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::article.article",
+      "mappedBy": "author"
+    }
+  }
+} 

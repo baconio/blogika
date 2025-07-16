@@ -1,0 +1,82 @@
+{
+  "kind": "collectionType",
+  "collectionName": "subscriptions",
+  "info": {
+    "singularName": "subscription",
+    "pluralName": "subscriptions",
+    "displayName": "Subscription",
+    "description": "Платные подписки на авторов"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "subscriber": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "author": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::author.author",
+      "required": true
+    },
+    "plan_type": {
+      "type": "enumeration",
+      "enum": ["monthly", "yearly", "lifetime"],
+      "required": true
+    },
+    "price": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["active", "cancelled", "expired", "pending", "trial"],
+      "default": "pending"
+    },
+    "payment_info": {
+      "type": "component",
+      "repeatable": false,
+      "component": "monetization.payment-info"
+    },
+    "started_at": {
+      "type": "datetime",
+      "required": true
+    },
+    "expires_at": {
+      "type": "datetime"
+    },
+    "trial_expires_at": {
+      "type": "datetime"
+    },
+    "auto_renewal": {
+      "type": "boolean",
+      "default": true
+    },
+    "cancelled_at": {
+      "type": "datetime"
+    },
+    "cancellation_reason": {
+      "type": "text",
+      "maxLength": 500
+    },
+    "next_billing_date": {
+      "type": "datetime"
+    },
+    "total_paid": {
+      "type": "decimal",
+      "default": 0.00,
+      "min": 0
+    },
+    "discount_percent": {
+      "type": "integer",
+      "min": 0,
+      "max": 100
+    }
+  }
+} 

@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_shared_social_links",
+  "info": {
+    "displayName": "Social Links",
+    "description": "Социальные ссылки автора"
+  },
+  "options": {},
+  "attributes": {
+    "platform": {
+      "type": "enumeration",
+      "enum": ["twitter", "telegram", "youtube", "instagram", "linkedin", "github"],
+      "required": true
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "handle": {
+      "type": "string"
+    }
+  }
+} 

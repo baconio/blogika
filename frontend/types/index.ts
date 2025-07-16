@@ -31,4 +31,75 @@ export type {
   AuthorProfileData,
   AuthorStats,
   AuthorAnalyticsSettings
-} from './Author'; 
+} from './Author';
+
+// Category types
+export type {
+  Category,
+  CategoryWithStats,
+  CategoryInput,
+  CategoryUpdate,
+  CategorySearchParams,
+  CategoryColor,
+  CATEGORY_COLORS
+} from './Category';
+
+// Tag types  
+export type {
+  Tag,
+  TagWithUsage,
+  TagInput,
+  TagUpdate,
+  TagSearchParams,
+  TagColor,
+  TAG_COLORS,
+  TagCloud,
+  TagStats
+} from './Tag';
+
+// Comment types
+export type {
+  Comment,
+  ModerationStatus,
+  CommentInput,
+  CommentUpdate,
+  CommentSearchParams,
+  CommentLikeAction,
+  CommentModerationData,
+  CommentStats,
+  CommentTree,
+  CommentFormData,
+  CommentDisplaySettings
+} from './Comment';
+
+// Subscription types
+export type {
+  Subscription,
+  PlanType,
+  SubscriptionStatus,
+  PaymentSystem,
+  PaymentStatus,
+  SubscriptionInput,
+  SubscriptionUpdate,
+  SubscriptionSearchParams,
+  SubscriptionCancellationData,
+  AuthorSubscriptionStats,
+  PricingPlan,
+  SubscriptionCard,
+  PaymentToken,
+  PaymentResult,
+  SubscriptionNotificationSettings
+} from './Subscription';
+
+// Component types
+export type {
+  SocialLink,
+  SocialPlatform,
+  SEOMeta,
+  PaymentInfo,
+  ExtendedSEOMeta,
+  OpenGraphData,
+  SocialCard,
+  SEOUtils,
+  SOCIAL_PLATFORMS_CONFIG
+} from './Components'; 
