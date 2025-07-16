@@ -242,10 +242,22 @@ export function validateUser(userData: UserInput): ValidationResult {
 - **Изоляция** критичных модулей
 
 ### Инструменты:
-- **Zod/Yup** для валидации
-- **Helmet** для безопасности заголовков
-- **Rate limiting** для API
-- **CORS** настройки
+```typescript
+// Валидация контента статьи
+export const ArticleContentSchema = z.object({
+  title: z.string().min(10).max(200),
+  content: z.string().min(100),
+  tags: z.array(z.string()).max(10)
+});
+
+// Санитизация HTML контента
+export const sanitizeContent = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'h2', 'h3', 'strong', 'em', 'ul', 'ol', 'li'],
+    ALLOWED_ATTR: ['href', 'title']
+  });
+};
+```
 
 ## 15. МОНИТОРИНГ И ЛОГИРОВАНИЕ
 
@@ -536,4 +548,471 @@ export const createArticleApiClient = (
 
 ---
 
-**ПОМНИ**: Микромодульность - это не самоцель, а средство для создания поддерживаемого, тестируемого и масштабируемого кода. Каждый модуль должен решать конкретную задачу максимально просто и эффективно. 
+## 17. ЛУЧШИЕ ПРАКТИКИ NEXT.JS 14+ (CONTEXT7)
+
+### A. Server/Client Components Composition (Микромодули)
+
+#### Правильное разделение Server/Client компонентов:
+```typescript
+// ✅ Layout как Server Component с минимальной Client логикой
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <nav>
+        <Logo />           {/* Server Component */}
+        <SearchBar />      {/* Client Component только для поиска */}
+      </nav>
+      <main>{children}</main>
+    </>
+  )
+}
+
+// ✅ Client Component только для интерактивности
+'use client'
+export const SearchBar = () => {
+  const [query, setQuery] = useState('')
+  // только клиентская логика поиска
+}
+```
+
+#### Composition Pattern - передача Server Components как children:
+```typescript
+// ✅ Правильно - Server Component передается как child
+export default function Page() {
+  return (
+    <ClientComponent>
+      <ServerComponent />    {/* Рендерится на сервере */}
+    </ClientComponent>
+  )
+}
+
+// ✅ Client Component принимает children
+'use client'
+export default function ClientComponent({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState(0)
+  return (
+    <>
+      <button onClick={() => setState(state + 1)}>{state}</button>
+      {children}    {/* Server-rendered контент */}
+    </>
+  )
+}
+```
+
+#### Антипаттерны - чего НЕ делать:
+```typescript
+// ❌ Неправильно - импорт Server Component в Client
+'use client'
+import ServerComponent from './ServerComponent'  // Ошибка!
+
+export default function ClientComponent() {
+  return <ServerComponent />  // Не работает
+}
+
+// ❌ Неправильно - слишком большой Client boundary
+'use client'
+export default function Layout({ children }) {   // Весь layout клиентский!
+  return (
+    <div>
+      <Logo />           {/* Теперь все клиентское */}
+      <Navigation />     {/* Больше JS в бандле */}
+      {children}
+    </div>
+  )
+}
+```
+
+### B. Data Fetching Patterns (Микромодули)
+
+#### Server Components с кэшированием:
+```typescript
+// ✅ lib/data/articles.ts - Server-only модуль
+import { cache } from 'react'
+import 'server-only'
+
+export const preload = (id: string) => {
+  void getArticle(id)  // Preload pattern
+}
+
+export const getArticle = cache(async (id: string) => {
+  // Автоматическое кэширование React
+  const response = await fetch(`/api/articles/${id}`, {
+    next: { revalidate: 3600 }  // Кэш на час
+  })
+  return response.json()
+})
+
+// ✅ Server Component использует preload
+export default async function Page({ params: { id } }) {
+  preload(id)  // Начинаем загрузку рано
+  const article = await getArticle(id)
+  
+  return <ArticleView article={article} />
+}
+```
+
+#### Client Components с React Query:
+```typescript
+// ✅ lib/hooks/useArticles.ts - Client-side модуль
+'use client'
+import { useQuery } from '@tanstack/react-query'
+
+export const useArticle = (id: string) => {
+  return useQuery({
+    queryKey: ['article', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/articles/${id}`)
+      if (!response.ok) throw new Error('Failed to fetch')
+      return response.json()
+    }
+  })
+}
+
+// ✅ Client Component
+'use client'
+export const ArticleReader = ({ id }: { id: string }) => {
+  const { data: article, isLoading } = useArticle(id)
+  
+  if (isLoading) return <Spinner />
+  return <ArticleView article={article} />
+}
+```
+
+### C. Layout и Navigation Patterns (Микромодули)
+
+#### Активная навигация с Client Components:
+```typescript
+// ✅ components/navigation/NavLinks.tsx
+'use client'
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
+
+export const NavLinks = () => {
+  const pathname = usePathname()
+  
+  return (
+    <nav>
+      <Link 
+        className={`link ${pathname === '/' ? 'active' : ''}`}
+        href="/"
+      >
+        Главная
+      </Link>
+      <Link 
+        className={`link ${pathname === '/articles' ? 'active' : ''}`}
+        href="/articles"
+      >
+        Статьи
+      </Link>
+    </nav>
+  )
+}
+
+// ✅ Layout использует компонент навигации
+export default function Layout({ children }) {
+  return (
+    <html>
+      <body>
+        <NavLinks />    {/* Client Component для активных ссылок */}
+        <main>{children}</main>
+      </body>
+    </html>
+  )
+}
+```
+
+#### Breadcrumbs с динамическими данными:
+```typescript
+// ✅ components/navigation/Breadcrumbs.tsx  
+'use client'
+import { usePathname } from 'next/navigation'
+
+export const Breadcrumbs = () => {
+  const pathname = usePathname()
+  const segments = pathname.split('/').filter(Boolean)
+  
+  return (
+    <nav>
+      {segments.map((segment, index) => (
+        <span key={index}>{segment}</span>
+      ))}
+    </nav>
+  )
+}
+```
+
+### D. Forms и Validation Patterns (Микромодули)
+
+#### React Hook Form с Server Actions:
+```typescript
+// ✅ lib/validation/article.ts - Validation модуль
+import { z } from 'zod'
+
+export const ArticleSchema = z.object({
+  title: z.string().min(10).max(200),
+  content: z.string().min(100),
+  tags: z.array(z.string()).max(10)
+})
+
+export type ArticleFormData = z.infer<typeof ArticleSchema>
+
+// ✅ lib/actions/articles.ts - Server Action модуль
+'use server'
+import { ArticleSchema } from '@/lib/validation/article'
+
+export async function createArticle(formData: FormData) {
+  const data = {
+    title: formData.get('title'),
+    content: formData.get('content'),
+    tags: formData.getAll('tags')
+  }
+  
+  const validatedData = ArticleSchema.parse(data)
+  // Сохранение в БД
+}
+
+// ✅ components/forms/ArticleForm.tsx - Client Component
+'use client'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { ArticleSchema, type ArticleFormData } from '@/lib/validation/article'
+import { createArticle } from '@/lib/actions/articles'
+
+export const ArticleForm = () => {
+  const form = useForm<ArticleFormData>({
+    resolver: zodResolver(ArticleSchema)
+  })
+  
+  return (
+    <form action={createArticle}>
+      <input {...form.register('title')} />
+      <textarea {...form.register('content')} />
+    </form>
+  )
+}
+```
+
+### E. Internationalization Patterns (Микромодули)
+
+#### Server Components с переводами:
+```typescript
+// ✅ Server Component
+import { getTranslations } from 'next-intl/server'
+
+export default async function ArticlePage() {
+  const t = await getTranslations('articles')
+  
+  return (
+    <div>
+      <h1>{t('title')}</h1>
+      <p>{t('description')}</p>
+    </div>
+  )
+}
+```
+
+#### Client Components с переводами:
+```typescript
+// ✅ Client Component  
+'use client'
+import { useTranslations } from 'next-intl'
+
+export const ArticleActions = () => {
+  const t = useTranslations('articles')
+  
+  return (
+    <div>
+      <button>{t('save')}</button>
+      <button>{t('publish')}</button>
+    </div>
+  )
+}
+```
+
+### F. Error Handling Patterns (Микромодули)
+
+#### Глобальный Error Handler:
+```typescript
+// ✅ app/global-error.tsx
+'use client'
+import { useEffect } from 'react'
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  useEffect(() => {
+    // Логирование ошибки в сервис аналитики
+    console.error(error)
+  }, [error])
+
+  return (
+    <html>
+      <body>
+        <h2>Что-то пошло не так!</h2>
+        <button onClick={() => reset()}>
+          Попробовать снова
+        </button>
+      </body>
+    </html>
+  )
+}
+```
+
+#### Error Boundaries для компонентов:
+```typescript
+// ✅ lib/components/ErrorBoundary.tsx
+'use client'
+import { ErrorBoundary } from 'react-error-boundary'
+
+const ErrorFallback = ({ error, resetErrorBoundary }) => (
+  <div>
+    <h2>Ошибка в компоненте</h2>
+    <button onClick={resetErrorBoundary}>Перезагрузить</button>
+  </div>
+)
+
+export const ComponentErrorBoundary = ({ children }) => (
+  <ErrorBoundary FallbackComponent={ErrorFallback}>
+    {children}
+  </ErrorBoundary>
+)
+```
+
+### G. Performance Patterns (Микромодули)
+
+#### Partial Prerendering с Suspense:
+```typescript
+// ✅ app/articles/page.tsx
+import { Suspense } from 'react'
+
+export const experimental_ppr = true
+
+export default function ArticlesPage() {
+  return (
+    <section>
+      <h1>Все статьи</h1>      {/* Prerendered */}
+      <Suspense fallback={<ArticlesSkeleton />}>
+        <ArticlesList />       {/* Dynamic */}
+      </Suspense>
+    </section>
+  )
+}
+```
+
+#### Оптимизация Client Bundle:
+```typescript
+// ✅ Динамический импорт для больших компонентов
+import dynamic from 'next/dynamic'
+
+const ArticleEditor = dynamic(() => import('./ArticleEditor'), {
+  loading: () => <p>Загрузка редактора...</p>,
+  ssr: false  // Только на клиенте
+})
+
+export default function WritePage() {
+  return (
+    <div>
+      <h1>Написать статью</h1>
+      <ArticleEditor />
+    </div>
+  )
+}
+```
+
+### H. API Client Patterns (Микромодули)
+
+#### Типизированный API Client:
+```typescript
+// ✅ lib/api/client.ts
+class ApiClient {
+  constructor(private baseUrl: string) {}
+  
+  async get<T>(endpoint: string): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`)
+    if (!response.ok) throw new Error(`API Error: ${response.status}`)
+    return response.json()
+  }
+  
+  async post<T, D>(endpoint: string, data: D): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    if (!response.ok) throw new Error(`API Error: ${response.status}`)
+    return response.json()
+  }
+}
+
+export const apiClient = new ApiClient('/api')
+
+// ✅ lib/api/articles.ts - Typed API модуль
+export interface Article {
+  id: string
+  title: string
+  content: string
+}
+
+export const articlesApi = {
+  getAll: () => apiClient.get<Article[]>('/articles'),
+  getById: (id: string) => apiClient.get<Article>(`/articles/${id}`),
+  create: (data: Omit<Article, 'id'>) => apiClient.post<Article, typeof data>('/articles', data)
+}
+```
+
+### I. Analytics и Monitoring Patterns (Микромодули)
+
+#### Analytics Hook:
+```typescript
+// ✅ lib/hooks/useAnalytics.ts
+'use client'
+import { useCallback } from 'react'
+
+export const useAnalytics = () => {
+  const trackEvent = useCallback((eventName: string, data?: Record<string, any>) => {
+    // Отправка в аналитику
+    if (typeof window !== 'undefined') {
+      // gtag, mixpanel, etc.
+      console.log('Track event:', eventName, data)
+    }
+  }, [])
+
+  return { trackEvent }
+}
+
+// ✅ Использование в компонентах
+export const ArticleCard = ({ article }) => {
+  const { trackEvent } = useAnalytics()
+  
+  const handleClick = () => {
+    trackEvent('article_clicked', { 
+      articleId: article.id,
+      title: article.title 
+    })
+  }
+  
+  return <div onClick={handleClick}>{article.title}</div>
+}
+```
+
+### J. Context7 Integration Rules
+
+#### Когда использовать Context7:
+- **Новые технологии** или незнакомые паттерны
+- **Сложные интеграции** (платежи, аналитика, аутентификация)
+- **Performance проблемы** - поиск оптимизаций
+- **Архитектурные решения** для масштабирования
+
+#### Как интегрировать с микромодулями:
+1. **Изучать паттерны** из Context7 документации
+2. **Адаптировать под наши правила** (< 100 строк, типизация)
+3. **Разбивать крупные решения** на микромодули
+4. **Тестировать и документировать** каждый адаптированный паттерн
+
+---
+
+**ПОМНИ**: Микромодульность + Context7 лучшие практики = максимально эффективная разработка. Каждый модуль решает конкретную задачу с использованием проверенных паттернов от экспертов индустрии. 
