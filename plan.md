@@ -15,8 +15,8 @@
 ## Этап 1: Подготовка окружения и базовая настройка (1-2 дня)
 
 ### 1.1 Настройка локального окружения
-- [ ] Установить Node.js 18+ и npm/yarn
-- [ ] Установить Docker Desktop для локальной разработки
+- [x] Установить Node.js 18+ и npm/yarn
+- [x] Установить Docker Desktop для локальной разработки  
 - [ ] Настроить VS Code с расширениями:
   - TypeScript
   - Tailwind CSS IntelliSense
@@ -26,38 +26,38 @@
   - Tiptap Editor extensions
 
 ### 1.2 Создание структуры проекта
-- [ ] Создать корневую папку проекта `blog-platform/`
+- [x] Создать корневую папку проекта `blogika/`
 - [x] Инициализировать Git репозиторий
 - [x] Создать `.gitignore` для Node.js проектов
-- [ ] Создать `docker-compose.yml` для локальной разработки:
-  - PostgreSQL (без PostGIS)
-  - Redis
-  - Elasticsearch
-  - MinIO (для development)
-- [ ] Настроить PostgreSQL контейнер
+- [x] Создать `docker-compose.yml` для локальной разработки:
+  - PostgreSQL (без PostGIS) ✅
+  - Redis ✅
+  - Elasticsearch ✅
+  - MinIO (для development) ✅
+- [x] Настроить PostgreSQL контейнер
 
 ### 1.3 Базовая документация
 - [x] Создать `README.md` с инструкциями по запуску
-- [ ] Создать `CONTRIBUTING.md` с правилами разработки
-- [ ] Настроить `.env.example` файлы
-- [ ] Документировать бизнес-модель и монетизацию
+- [x] Создать `CONTRIBUTING.md` с правилами разработки
+- [x] Настроить `.env.example` файлы (в Strapi и SETUP.md)
+- [x] Документировать бизнес-модель и монетизацию (в tz.md)
 
 ### 1.4 Настройка микромодульной архитектуры для блога
-- [ ] Создать структуру папок строго по принципам микромодулей:
+- [x] Создать структуру папок строго по принципам микромодулей:
   ```text
   frontend/components/
-  ├── ui/           # Атомарные компоненты (Button, Input, Modal)
-  ├── forms/        # Формы (ArticleForm, CommentForm)
-  ├── layout/       # Layout (Header, Footer, PageLayout)  
-  └── features/     # Бизнес-логика (article-editor, social-features)
+  ├── ui/           # Атомарные компоненты (Button, Input, Modal) ✅
+  ├── forms/        # Формы (ArticleForm, CommentForm) ✅
+  ├── layout/       # Layout (Header, Footer, PageLayout) ✅
+  └── features/     # Бизнес-логика (article-editor, social-features) ✅
   
   frontend/lib/
-  ├── api/          # API клиенты с полной структурой модулей
-  ├── utils/        # Утилиты
-  ├── validation/   # Zod схемы валидации
-  └── constants/    # Константы приложения
+  ├── api/          # API клиенты с полной структурой модулей ✅
+  ├── utils/        # Утилиты ✅
+  ├── validation/   # Zod схемы валидации ✅
+  └── constants/    # Константы приложения ✅
   ```
-- [ ] Настроить обязательные ESLint правила:
+- [x] Настроить обязательные ESLint правила:
   ```json
   {
     "rules": {
@@ -80,10 +80,10 @@
 ## Этап 2: Backend - Настройка Strapi для блога (2-3 дня)
 
 ### 2.1 Инициализация Strapi
-- [ ] Создать новый Strapi проект: `npx create-strapi-app@latest backend --typescript`
-- [ ] Настроить подключение к PostgreSQL (без PostGIS)
+- [x] Создать новый Strapi проект: `npx create-strapi-app@latest strapi --typescript`
+- [x] Настроить подключение к PostgreSQL (без PostGIS) - blogika_dev
 - [ ] Настроить интеграцию с Redis для кэширования
-- [ ] Запустить Strapi в development режиме
+- [x] Запустить Strapi в development режиме - localhost:1337
 
 ### 2.2 Создание Content Types для блога (микромодульно)
 
@@ -212,12 +212,14 @@
 
 ### 3.1 Инициализация Next.js проекта
 - [ ] Создать Next.js проект: `npx create-next-app@latest frontend --typescript --tailwind --app`
-- [ ] Установить зависимости для блога:
-  - `daisyui` для UI компонентов
-  - `@tiptap/react` `@tiptap/starter-kit` для редактора
-  - `framer-motion` для анимаций
-  - `@tanstack/react-query` для кэширования
-  - `react-hook-form` `zod` для форм
+- [x] Создать базовую frontend конфигурацию:
+  - `package.json` с зависимостями блога ✅
+  - `@tiptap/react` `@tiptap/starter-kit` для редактора ✅
+  - `framer-motion` для анимаций ✅  
+  - `@tanstack/react-query` для кэширования ✅
+  - `react-hook-form` `zod` для форм ✅
+- [x] Настроить ESLint (max-lines: 100, max-lines-per-function: 20) ✅
+- [x] Настроить TypeScript конфигурацию с абсолютными импортами ✅
 - [ ] Настроить `tailwind.config.js` с DaisyUI и кастомной палитрой
 - [ ] Настроить базовую структуру папок в `app/`
 
@@ -231,12 +233,14 @@
   - `lib/api/search.ts` - поиск контента
   - `lib/api/analytics.ts` - аналитика
 - [ ] Настроить React Query Provider
-- [ ] Создать TypeScript типы для блога (микромодули):
-  - `types/article.ts`
-  - `types/author.ts`
-  - `types/comment.ts`
-  - `types/subscription.ts`
-  - `types/analytics.ts`
+- [x] Создать TypeScript типы для блога (микромодули):
+  - `types/Article.ts` ✅
+  - `types/User.ts` ✅  
+  - `types/Author.ts` ✅
+  - `types/index.ts` ✅ (экспорт всех типов)
+  - [ ] `types/comment.ts`
+  - [ ] `types/subscription.ts`
+  - [ ] `types/analytics.ts`
 
 ### 3.3 Утилиты для блога (микромодули)
 - [ ] `lib/utils/editor.ts` - утилиты редактора (форматирование, экспорт)
