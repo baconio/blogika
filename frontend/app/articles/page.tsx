@@ -58,7 +58,7 @@ export default function ArticlesPage() {
         <ArticleList 
           variant="grid"
           showPagination={true}
-          emptyStateMessage="Статьи скоро появятся! Следите за обновлениями."
+          emptyMessage="Статьи скоро появятся! Следите за обновлениями."
         />
       </div>
     </BlogLayout>
