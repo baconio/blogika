@@ -1,0 +1,118 @@
+/**
+ * React хук use{{name}}
+ * @description {{description}}
+ */
+'use client';
+
+{{#if (eq type 'query')}}
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+{{else if (eq type 'state')}}
+import { useState, useCallback, useMemo } from 'react';
+{{else if (eq type 'effect')}}
+import { useEffect, useState } from 'react';
+{{else}}
+import { useCallback, useMemo } from 'react';
+{{/if}}
+
+/**
+ * Параметры хука use{{name}}
+ */
+export interface Use{{name}}Params {
+  /** Включен ли хук */
+  readonly enabled?: boolean;
+}
+
+/**
+ * Результат хука use{{name}}
+ */
+export interface Use{{name}}Result {
+  /** Загружается ли данные */
+  readonly isLoading: boolean;
+  /** Ошибка */
+  readonly error: Error | null;
+  /** Данные */
+  readonly data: any | null;
+}
+
+/**
+ * Хук use{{name}}
+ * @param params - параметры хука
+ * @returns результат работы хука
+ */
+export const use{{name}} = (params: Use{{name}}Params = {}): Use{{name}}Result => {
+  const { enabled = true } = params;
+
+  {{#if (eq type 'query')}}
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['{{camelCase name}}'],
+    queryFn: async () => {
+      // TODO: Реализовать запрос к API
+      return null;
+    },
+    enabled
+  });
+
+  return {
+    data,
+    isLoading,
+    error: error as Error | null
+  };
+  {{else if (eq type 'state')}}
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const updateData = useCallback((newData: any) => {
+    setData(newData);
+  }, []);
+
+  return useMemo(() => ({
+    data,
+    isLoading,
+    error,
+    updateData
+  }), [data, isLoading, error, updateData]);
+  {{else if (eq type 'effect')}}
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // TODO: Реализовать логику
+        setData(null);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [enabled]);
+
+  return {
+    data,
+    isLoading,
+    error
+  };
+  {{else}}
+  const processData = useCallback((input: any) => {
+    // TODO: Реализовать кастомную логику
+    return input;
+  }, []);
+
+  return {
+    data: null,
+    isLoading: false,
+    error: null,
+    processData
+  };
+  {{/if}}
+}; 

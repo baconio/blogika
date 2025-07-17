@@ -1,0 +1,78 @@
+/**
+ * API модуль для {{entityName}}
+ * @description {{description}}
+ */
+
+import { apiClient } from './client';
+import type { {{entityName}}, {{entityName}}Input, {{entityName}}Update } from '@/types';
+
+{{#if (includes methods 'getAll')}}
+/**
+ * Получить все {{name}}
+ * @returns список {{name}}
+ */
+export const getAll = async (): Promise<{{entityName}}[]> => {
+  const response = await apiClient.get<{{entityName}}[]>('/{{kebabCase name}}');
+  return response;
+};
+{{/if}}
+
+{{#if (includes methods 'getById')}}
+/**
+ * Получить {{name}} по ID
+ * @param id - идентификатор {{name}}
+ * @returns {{name}}
+ */
+export const getById = async (id: string): Promise<{{entityName}}> => {
+  const response = await apiClient.get<{{entityName}}>(`/{{kebabCase name}}/${id}`);
+  return response;
+};
+{{/if}}
+
+{{#if (includes methods 'create')}}
+/**
+ * Создать новый {{name}}
+ * @param data - данные для создания
+ * @returns созданный {{name}}
+ */
+export const create = async (data: {{entityName}}Input): Promise<{{entityName}}> => {
+  const response = await apiClient.post<{{entityName}}>('/{{kebabCase name}}', data);
+  return response;
+};
+{{/if}}
+
+{{#if (includes methods 'update')}}
+/**
+ * Обновить {{name}}
+ * @param id - идентификатор {{name}}
+ * @param data - данные для обновления
+ * @returns обновленный {{name}}
+ */
+export const update = async (id: string, data: {{entityName}}Update): Promise<{{entityName}}> => {
+  const response = await apiClient.put<{{entityName}}>(`/{{kebabCase name}}/${id}`, data);
+  return response;
+};
+{{/if}}
+
+{{#if (includes methods 'delete')}}
+/**
+ * Удалить {{name}}
+ * @param id - идентификатор {{name}}
+ * @returns подтверждение удаления
+ */
+export const remove = async (id: string): Promise<{ success: boolean }> => {
+  const response = await apiClient.delete<{ success: boolean }>(`/{{kebabCase name}}/${id}`);
+  return response;
+};
+{{/if}}
+
+/**
+ * Объект API для {{entityName}}
+ */
+export const {{camelCase name}}Api = {
+  {{#if (includes methods 'getAll')}}getAll,{{/if}}
+  {{#if (includes methods 'getById')}}getById,{{/if}}
+  {{#if (includes methods 'create')}}create,{{/if}}
+  {{#if (includes methods 'update')}}update,{{/if}}
+  {{#if (includes methods 'delete')}}remove{{/if}}
+} as const; 

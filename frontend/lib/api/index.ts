@@ -31,6 +31,9 @@ export * as analyticsApi from './analytics';
 // Recommendations API
 export * as recommendationsApi from './recommendations';
 
+// Authentication API
+export * as authApi from './auth';
+
 /**
  * Объединенный API для удобного использования
  */
@@ -42,7 +45,8 @@ export const api = {
   tags: tagsApi,
   search: searchApi,
   analytics: analyticsApi,
-  recommendations: recommendationsApi
+  recommendations: recommendationsApi,
+  auth: authApi
 } as const;
 
 /**

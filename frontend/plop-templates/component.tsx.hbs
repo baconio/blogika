@@ -1,0 +1,26 @@
+/**
+ * {{name}} компонент
+ * @description {{description}}
+ */
+'use client';
+
+import React from 'react';
+import type { {{name}}Props } from './{{name}}.types';
+
+/**
+ * {{name}} компонент
+ */
+export const {{name}}: React.FC<{{name}}Props> = ({
+  children,
+  className = '',
+  ...props
+}) => {
+  return (
+    <div 
+      className={`{{kebabCase name}} ${className}`}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}; 

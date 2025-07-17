@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Перейти в frontend папку
+cd frontend
+
+echo "📏 Checking file sizes (max 100 lines per file)..."
+# Проверка размера файлов (исключаем конфиги и тесты)
+large_files=$(find . -name "*.ts" -o -name "*.tsx" \
+  | grep -v node_modules \
+  | grep -v ".next" \
+  | grep -v ".test." \
+  | grep -v ".stories." \
+  | grep -v "config" \
+  | grep -v "types/" \
+  | xargs wc -l \
+  | awk '$1 > 100 && $2 != "total"' \
+  | head -10)
+
+if [ -n "$large_files" ]; then
+  echo "❌ Files exceed 100 lines limit:"
+  echo "$large_files"
+  echo "Please split large files into smaller modules"
+  exit 1
+fi
+
+echo "📝 Running ESLint..."
+npm run lint
+
+echo "🔧 Running TypeScript type check..."
+npm run type-check
+
+echo "🧪 Running tests..."
+npm run test -- --passWithNoTests
+
+echo "✅ All pre-commit checks passed!"

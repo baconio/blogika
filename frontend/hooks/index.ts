@@ -84,4 +84,23 @@ export {
   type ReadingProgressData,
   type UseReadingProgressOptions,
   type ReadingMilestone
-} from './useReadingProgress'; 
+} from './useReadingProgress';
+
+// Хук для аутентификации
+export {
+  useAuth,
+  type UseAuthParams,
+  type UseAuthResult,
+  type Maybe
+} from './useAuth';
+
+// Хук для кэширования
+export {
+  useCache,
+  useArticleCache,
+  useSearchCache,
+  useUserCache,
+  useCacheInvalidation,
+  type UseCacheParams,
+  type UseCacheResult
+} from './useCache'; 

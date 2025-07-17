@@ -19,8 +19,7 @@ export type {
   UserRole,
   UserRegistrationData,
   UserLoginData,
-  UserProfileUpdate,
-  UserSession
+  UserProfileUpdate
 } from './User';
 
 // Author types
@@ -142,4 +141,21 @@ export type {
   AuthorRecommendation,
   RecommendationExperiment,
   PersonalizationSettings
-} from './Recommendation'; 
+} from './Recommendation';
+
+// Authentication types
+export type {
+  LoginCredentials,
+  RegisterData,
+  AuthResponse,
+  UserSession,
+  ResetPasswordData,
+  ConfirmResetPasswordData,
+  ChangePasswordData,
+  EmailVerificationData,
+  AuthError,
+  AuthErrorCode,
+  AuthState,
+  ContentPermissions,
+  AuthSettings
+} from './Auth'; 

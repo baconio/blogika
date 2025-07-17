@@ -1,0 +1,47 @@
+{
+  "name": "blogika",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Блоговая платформа нового поколения с микромодульной архитектурой",
+  "scripts": {
+    "prepare": "husky install",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:strapi": "cd strapi && npm run develop",
+    "dev": "concurrently \"npm run dev:strapi\" \"npm run dev:frontend\"",
+    "build:frontend": "cd frontend && npm run build",
+    "build:strapi": "cd strapi && npm run build",
+    "build": "npm run build:strapi && npm run build:frontend",
+    "lint": "cd frontend && npm run lint",
+    "test": "cd frontend && npm run test",
+    "type-check": "cd frontend && npm run type-check",
+    "install:all": "npm install && cd frontend && npm install && cd ../strapi && npm install"
+  },
+  "workspaces": [
+    "frontend",
+    "strapi"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^18.0.0",
+    "@commitlint/config-conventional": "^18.0.0",
+    "husky": "^8.0.0",
+    "concurrently": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baconio/blogika.git"
+  },
+  "keywords": [
+    "blog",
+    "platform",
+    "nextjs",
+    "strapi",
+    "micromodules",
+    "typescript"
+  ],
+  "author": "Blogika Team",
+  "license": "MIT"
+} 
