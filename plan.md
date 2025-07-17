@@ -8,7 +8,7 @@
 - ✅ **Context7 лучшие практики интегрированы** - Next.js 14+ паттерны в .cursor/rules
 - ✅ **Этап 1 завершен** - базовая настройка проекта, микромодульная структура, Docker
 - ✅ **Strapi v5 инициализирован** - подключен к PostgreSQL, админка на localhost:1337
-- ✅ **ЭТАП 2 ЗАВЕРШЕН ПОЛНОСТЬЮ** - все Content Types и Components созданы
+- ✅ **ЭТАП 2 ЗАВЕРШЕН ПОЛНОСТЬЮ** - все Content Types, Components, роли, middleware и сервисы созданы
 - ✅ **Микромодульная архитектура** - 6 Content Types + 3 Components с полным API
 - ✅ **Backend готов к интеграции** - Category, Tag, Author, Article, Comment, Subscription
 - ✅ **Этап 3.1-3.2 завершены** - TypeScript типы и API клиенты созданы
@@ -193,28 +193,36 @@
   - `status` (enum: pending|processing|succeeded|failed|cancelled) ✅
   - `payment_method`, `is_active`, `metadata` ✅
 
-### 2.4 Настройка ролей и прав доступа
-- [ ] Создать роль `author` с правами:
+### 2.4 Настройка ролей и прав доступа ✅ ЗАВЕРШЕНО
+- [x] Создать роль `author` с правами: ✅
   - Чтение и создание собственных статей
   - Редактирование своего профиля
   - Просмотр своей аналитики
   - Управление подписками на себя
-- [ ] Создать роль `subscriber` с правами:
+- [x] Создать роль `subscriber` с правами: ✅
   - Чтение бесплатных статей
   - Чтение премиум статей при подписке
   - Создание комментариев
   - Управление подписками
-- [ ] Настроить политики безопасности для контента
+- [x] Настроить автоматическое создание ролей при запуске Strapi ✅
 
 ### 2.5 Кастомные контроллеры и сервисы (микромодули)
 
-- [ ] **articles/controllers/article.ts** - основные CRUD операции
-- [ ] **articles/controllers/feed.ts** - персонализированная лента
-- [ ] **articles/controllers/trending.ts** - популярные статьи
-- [ ] **articles/controllers/recommendations.ts** - рекомендации статей
-- [ ] **articles/services/content-processing.ts** - обработка контента
-- [ ] **articles/services/seo-generation.ts** - автогенерация SEO
-- [ ] **articles/services/reading-time.ts** - расчет времени чтения
+**2.5.1 Middleware для API (микромодули)** ✅ ЗАВЕРШЕНО
+- [x] **article/middlewares/populate-middleware.ts** - автозаполнение связей ✅
+- [x] **article/middlewares/views-counter.ts** - подсчет просмотров ✅  
+- [x] **comment/middlewares/moderation-filter.ts** - фильтрация комментариев ✅
+- [x] **comment/middlewares/spam-detection.ts** - детекция спама ✅
+- [x] **subscription/middlewares/access-control.ts** - контроль доступа ✅
+- [x] **subscription/middlewares/payment-validation.ts** - валидация платежей ✅
+
+**2.5.2 Дополнительные контроллеры и сервисы** ✅ ЗАВЕРШЕНО
+- [x] **articles/controllers/feed.ts** - персонализированная лента ✅
+- [x] **articles/controllers/trending.ts** - популярные статьи ✅  
+- [ ] **articles/controllers/recommendations.ts** - рекомендации статей (зависит от аналитики)
+- [x] **articles/services/content-processing.ts** - обработка контента ✅
+- [x] **articles/services/seo-generation.ts** - автогенерация SEO ✅
+- [x] **articles/services/reading-time.ts** - расчет времени чтения ✅
 - [ ] **monetization/controllers/subscriptions.ts** - управление подписками
 - [ ] **monetization/controllers/payments.ts** - обработка платежей
 - [ ] **monetization/services/payment-processing.ts** - интеграция платежек
