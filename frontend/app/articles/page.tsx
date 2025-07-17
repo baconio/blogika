@@ -51,8 +51,8 @@ export default function ArticlesPage() {
           </p>
         </div>
 
-        {/* Фильтр по категориям */}
-        <CategoryFilter />
+        {/* Фильтр по категориям - пока убираем до подключения API */}
+        {/* <CategoryFilter /> */}
 
         {/* Список статей */}
         <ArticleList 
