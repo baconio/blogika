@@ -101,19 +101,19 @@ export default factories.createCoreService('api::comment.comment', ({ strapi }) 
    */
   async getCommentStats(articleId: number) {
     const total = await strapi.entityService.count('api::comment.comment', {
-      filters: { article: articleId }
+      filters: { article: { id: articleId } }
     });
     
     const approved = await strapi.entityService.count('api::comment.comment', {
       filters: { 
-        article: articleId,
+        article: { id: articleId },
         moderation_status: 'approved'
       }
     });
     
     const pending = await strapi.entityService.count('api::comment.comment', {
       filters: { 
-        article: articleId,
+        article: { id: articleId },
         moderation_status: 'pending'
       }
     });

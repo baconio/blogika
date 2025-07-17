@@ -164,9 +164,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     <BlogLayout 
       showSidebar={true}
       sidebarContent={{
-        categories: { show: true },
-        tags: { show: true },
-        popularArticles: { show: true, limit: 5 }
+        showCategories: true,
+        showTags: true,
+        showPopularArticles: true
       }}
       breadcrumbs={breadcrumbs}
     >

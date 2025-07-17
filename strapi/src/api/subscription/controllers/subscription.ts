@@ -63,7 +63,7 @@ export default factories.createCoreController('api::subscription.subscription', 
     }
 
     // Проверяем права доступа
-    if (subscription.subscriber.id !== ctx.state.user.id) {
+    if ((subscription as any).subscriber?.id !== ctx.state.user.id) {
       return ctx.forbidden('Access denied');
     }
 
@@ -104,8 +104,8 @@ export default factories.createCoreController('api::subscription.subscription', 
     const userId = ctx.state.user.id;
     const { status } = ctx.query;
 
-    const filters = {
-      subscriber: userId
+    const filters: any = {
+      subscriber: { id: userId }
     };
 
     if (status) {
@@ -142,7 +142,7 @@ export default factories.createCoreController('api::subscription.subscription', 
     // Возвращаем только данные подписчиков
     const subscribers = subscriptions.map(sub => ({
       id: sub.id,
-      subscriber: sub.subscriber,
+      subscriber: (sub as any).subscriber,
       plan_type: sub.plan_type,
       started_at: sub.started_at,
       total_paid: sub.total_paid

@@ -11,18 +11,18 @@ export default factories.createCoreController('api::article.article', ({ strapi 
    * @returns отфильтрованные статьи
    */
   async findWithFilters(ctx) {
-    const { category, author, status, featured, limit = 10 } = ctx.query;
+    const { category, author, status, featured, limit = '10' } = ctx.query;
 
-    const filters = {};
-    if (category) filters.category = category;
-    if (author) filters.author = author;
+    const filters: any = {};
+    if (category) filters.category = { id: category };
+    if (author) filters.author = { id: author };
     if (status) filters.status = status;
     if (featured !== undefined) filters.is_featured = featured === 'true';
 
     const articles = await strapi.entityService.findMany('api::article.article', {
       filters,
       populate: ['author', 'category', 'tags', 'cover_image'],
-      limit: parseInt(limit),
+      limit: parseInt(limit as string),
       sort: { createdAt: 'desc' }
     });
 
@@ -35,12 +35,12 @@ export default factories.createCoreController('api::article.article', ({ strapi 
    * @returns статьи отсортированные по популярности
    */
   async findTrending(ctx) {
-    const { limit = 10 } = ctx.query;
+    const { limit = '10' } = ctx.query;
 
     const articles = await strapi.entityService.findMany('api::article.article', {
       filters: { status: 'published' },
       populate: ['author', 'category', 'cover_image'],
-      limit: parseInt(limit),
+      limit: parseInt(limit as string),
       sort: { views_count: 'desc', likes_count: 'desc' }
     });
 

@@ -1,11 +1,22 @@
 /**
  * React хук для работы с Redis кэшем
- * @description Интеграция кэширования с React Query
+ * @description Интеграция кэширования с React Query через API роуты
  */
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { cache, type CacheOptions } from '@/lib/cache/redis';
+
+/**
+ * Настройки кэширования
+ */
+export interface CacheOptions {
+  /** Время жизни в секундах */
+  readonly ttl?: number;
+  /** Теги для группового удаления */
+  readonly tags?: readonly string[];
+  /** Сжатие данных */
+  readonly compress?: boolean;
+}
 
 /**
  * Параметры хука useCache
@@ -61,21 +72,38 @@ export const useCache = <T>(params: UseCacheParams<T>): UseCacheResult<T> => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['cache', key],
     queryFn: async () => {
-      // Сначала пытаемся получить из Redis
-      const cachedData = await cache.articles.get(key);
-      if (cachedData) {
-        return cachedData;
-      }
+      try {
+        // Сначала пытаемся получить из кэша через API
+        const response = await fetch(`/api/cache/get?key=${encodeURIComponent(key)}`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data) {
+            return result.data;
+          }
+        }
 
-      // Если нет в кэше и есть fetcher, получаем данные
-      if (fetcher) {
-        const freshData = await fetcher();
-        // Сохраняем в кэш
-        await cache.articles.set(key, freshData);
-        return freshData;
-      }
+        // Если нет в кэше и есть fetcher, получаем данные
+        if (fetcher) {
+          const freshData = await fetcher();
+          // Сохраняем в кэш через API
+          await fetch('/api/cache/set', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              key, 
+              value: freshData,
+              options: cacheOptions 
+            })
+          });
+          return freshData;
+        }
 
-      return null;
+        return null;
+      } catch (err) {
+        console.warn('Cache error:', err);
+        // Fallback к fetcher если кэш недоступен
+        return fetcher ? await fetcher() : null;
+      }
     },
     enabled,
     staleTime,
@@ -85,7 +113,11 @@ export const useCache = <T>(params: UseCacheParams<T>): UseCacheResult<T> => {
   // Мутация для установки кэша
   const setCacheMutation = useMutation({
     mutationFn: async ({ value, options }: { value: T; options?: CacheOptions }) => {
-      await cache.articles.set(key, value);
+      await fetch('/api/cache/set', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value, options })
+      });
       // Обновляем React Query кэш
       queryClient.setQueryData(['cache', key], value);
     }
@@ -94,7 +126,11 @@ export const useCache = <T>(params: UseCacheParams<T>): UseCacheResult<T> => {
   // Мутация для инвалидации кэша
   const invalidateMutation = useMutation({
     mutationFn: async () => {
-      await cache.articles.invalidate(key);
+      await fetch('/api/cache/invalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key })
+      });
       // Инвалидируем React Query кэш
       queryClient.invalidateQueries({ queryKey: ['cache', key] });
     }

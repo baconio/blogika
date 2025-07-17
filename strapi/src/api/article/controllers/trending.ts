@@ -27,7 +27,7 @@ interface ArticleWithMetrics {
   readonly views_count: number;
   readonly likes_count: number;
   readonly comments_count: number;
-  readonly published_at: string;
+  readonly published_at_custom: string;
 }
 
 /**

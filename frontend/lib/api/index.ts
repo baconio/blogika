@@ -3,6 +3,9 @@
  * Следует принципу именованных экспортов для микромодульной архитектуры
  */
 
+// Импорт apiClient для функций ниже
+import { apiClient } from './client';
+
 // Базовый API клиент
 export { apiClient } from './client';
 export type { StrapiResponse, ApiError, RequestParams } from './client';
@@ -25,7 +28,7 @@ export { tagsApi } from './tags';
 // Search API
 export * as searchApi from './search';
 
-// Analytics API
+// Analytics API  
 export * as analyticsApi from './analytics';
 
 // Recommendations API
@@ -33,21 +36,6 @@ export * as recommendationsApi from './recommendations';
 
 // Authentication API
 export * as authApi from './auth';
-
-/**
- * Объединенный API для удобного использования
- */
-export const api = {
-  articles: articlesApi,
-  comments: commentsApi,
-  subscriptions: subscriptionsApi,
-  categories: categoriesApi,
-  tags: tagsApi,
-  search: searchApi,
-  analytics: analyticsApi,
-  recommendations: recommendationsApi,
-  auth: authApi
-} as const;
 
 /**
  * Настройка аутентификации для всех API

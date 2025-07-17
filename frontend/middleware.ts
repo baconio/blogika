@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 
 /**
  * Интерфейс JWT payload
@@ -47,17 +47,15 @@ const ROLE_PROTECTED_ROUTES = {
 /**
  * Проверка валидности JWT токена
  */
-const verifyToken = (token: string): JWTPayload | null => {
+const verifyToken = async (token: string): Promise<JWTPayload | null> => {
   try {
-    const secret = process.env.JWT_SECRET || 'fallback-secret';
-    const payload = jwt.verify(token, secret) as JWTPayload;
+    const secret = new TextEncoder().encode(
+      process.env.JWT_SECRET || 'fallback-secret'
+    );
     
-    // Проверяем срок действия токена
-    if (payload.exp * 1000 < Date.now()) {
-      return null;
-    }
+    const { payload } = await jwtVerify(token, secret);
     
-    return payload;
+    return payload as JWTPayload;
   } catch (error) {
     return null;
   }
@@ -111,7 +109,7 @@ const hasRoleAccess = (pathname: string, userRole: string): boolean => {
 /**
  * Основная функция middleware
  */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Пропускаем API маршруты и статические файлы
@@ -125,7 +123,7 @@ export function middleware(request: NextRequest) {
   }
 
   const token = getTokenFromRequest(request);
-  const user = token ? verifyToken(token) : null;
+  const user = token ? await verifyToken(token) : null;
   const isAuthenticated = !!user;
 
   // Для аутентифицированных пользователей на guest-only страницах

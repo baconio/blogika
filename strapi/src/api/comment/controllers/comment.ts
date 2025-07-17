@@ -37,11 +37,16 @@ export default factories.createCoreController('api::comment.comment', ({ strapi 
     const { id } = ctx.params;
     const { status, reason } = ctx.request.body;
 
-    const comment = await strapi.entityService.findOne('api::comment.comment', id);
+    const comment = await strapi.entityService.findOne('api::comment.comment', id, {
+      populate: { article: true }
+    });
     
     if (!comment) {
       return ctx.notFound('Comment not found');
     }
+
+    // Сохраняем ID статьи для обновления счетчика
+    const articleId = (comment as any).article?.id;
 
     const updatedComment = await strapi.entityService.update('api::comment.comment', id, {
       data: {
@@ -51,10 +56,12 @@ export default factories.createCoreController('api::comment.comment', ({ strapi 
     });
 
     // Обновляем счетчик комментариев статьи
-    if (status === 'approved') {
-      await this.updateArticleCommentsCount(comment.article.id, 1);
-    } else if (status === 'rejected' && comment.moderation_status === 'approved') {
-      await this.updateArticleCommentsCount(comment.article.id, -1);
+    if (articleId) {
+      if (status === 'approved') {
+        await strapi.service('api::comment.comment').updateArticleCommentsCount(articleId, 1);
+      } else if (status === 'rejected' && comment.moderation_status === 'approved') {
+        await strapi.service('api::comment.comment').updateArticleCommentsCount(articleId, -1);
+      }
     }
 
     return updatedComment;
@@ -87,18 +94,5 @@ export default factories.createCoreController('api::comment.comment', ({ strapi 
     return updatedComment;
   },
 
-  /**
-   * Обновление счетчика комментариев статьи
-   * @param articleId - ID статьи
-   * @param increment - изменение счетчика
-   */
-  async updateArticleCommentsCount(articleId: number, increment: number) {
-    const article = await strapi.entityService.findOne('api::article.article', articleId);
-    if (article) {
-      const newCount = Math.max(0, article.comments_count + increment);
-      await strapi.entityService.update('api::article.article', articleId, {
-        data: { comments_count: newCount }
-      });
-    }
-  }
+  // updateArticleCommentsCount moved to service
 })); 

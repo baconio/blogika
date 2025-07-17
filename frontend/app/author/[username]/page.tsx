@@ -164,11 +164,11 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
   
   return (
     <BlogLayout 
-      showSidebar={true}
+      sidebar="right"
       sidebarContent={{
-        categories: { show: true },
-        tags: { show: true },
-        popularArticles: { show: true, limit: 5 }
+        showCategories: true,
+        showTags: true,
+        showPopularArticles: true
       }}
       breadcrumbs={breadcrumbs}
     >
@@ -182,7 +182,6 @@ export default async function AuthorPage({ params, searchParams }: AuthorPagePro
                 src={author.attributes.avatar?.data?.attributes?.url}
                 alt={author.attributes.display_name}
                 size="xl"
-                fallback={author.attributes.display_name.charAt(0)}
               />
             </div>
             

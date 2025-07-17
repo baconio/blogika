@@ -47,7 +47,7 @@ const getUserFollowedAuthors = async (
       'api::subscription.subscription',
       {
         filters: {
-          subscriber: userId,
+          subscriber: { id: userId },
           status: 'active'
         },
         populate: ['author']
@@ -79,11 +79,11 @@ const getFollowingFeed = async (
   try {
     return await strapi.entityService.findMany('api::article.article', {
       filters: {
-        author: { $in: authorIds },
+        $or: authorIds.map(id => ({ author: { id } })),
         status: 'published'
       },
       populate: ['author', 'category', 'cover_image'],
-      sort: { published_at: 'desc' },
+      sort: { publishedAt: 'desc' },
       limit
     });
   } catch (error) {

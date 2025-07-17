@@ -214,7 +214,7 @@ export const commentsApi = {
    * Получение IP адреса клиента (для антиспама)
    * @returns IP адрес
    */
-  async getClientIP(): Promise<string> {
+  private async getClientIP(): Promise<string> {
     try {
       const response = await fetch('/api/client-ip');
       const data = await response.json();

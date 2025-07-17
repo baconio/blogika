@@ -64,7 +64,9 @@ export default factories.createCoreService('api::subscription.subscription', ({ 
    * @returns обновленная подписка
    */
   async cancelSubscription(subscriptionId: number, reason?: string) {
-    const subscription = await strapi.entityService.findOne('api::subscription.subscription', subscriptionId);
+    const subscription = await strapi.entityService.findOne('api::subscription.subscription', subscriptionId, {
+      populate: ['author']
+    });
 
     if (!subscription) {
       throw new Error('Subscription not found');
@@ -80,7 +82,7 @@ export default factories.createCoreService('api::subscription.subscription', ({ 
     });
 
     // Обновляем счетчик подписчиков автора
-    await this.updateAuthorSubscriberCount(subscription.author.id, -1);
+    await this.updateAuthorSubscriberCount((subscription as any).author.id, -1);
 
     return updatedSubscription;
   },
@@ -91,7 +93,9 @@ export default factories.createCoreService('api::subscription.subscription', ({ 
    * @returns обновленная подписка
    */
   async renewSubscription(subscriptionId: number) {
-    const subscription = await strapi.entityService.findOne('api::subscription.subscription', subscriptionId);
+    const subscription = await strapi.entityService.findOne('api::subscription.subscription', subscriptionId, {
+      populate: ['author']
+    });
 
     if (!subscription) {
       throw new Error('Subscription not found');
@@ -112,7 +116,7 @@ export default factories.createCoreService('api::subscription.subscription', ({ 
     });
 
     // Обновляем счетчик подписчиков автора
-    await this.updateAuthorSubscriberCount(subscription.author.id, 1);
+    await this.updateAuthorSubscriberCount((subscription as any).author.id, 1);
 
     return updatedSubscription;
   },
@@ -180,12 +184,12 @@ export default factories.createCoreService('api::subscription.subscription', ({ 
    */
   async getAuthorStats(authorId: number) {
     const totalSubscriptions = await strapi.entityService.count('api::subscription.subscription', {
-      filters: { author: authorId }
+      filters: { author: { id: authorId } }
     });
 
     const activeSubscriptions = await strapi.entityService.count('api::subscription.subscription', {
       filters: { 
-        author: authorId,
+        author: { id: authorId },
         status: 'active'
       }
     });
@@ -209,7 +213,7 @@ export default factories.createCoreService('api::subscription.subscription', ({ 
   async calculateMonthlyRevenue(authorId: number): Promise<number> {
     const activeSubscriptions = await strapi.entityService.findMany('api::subscription.subscription', {
       filters: {
-        author: authorId,
+        author: { id: authorId },
         status: 'active'
       }
     });
@@ -227,7 +231,7 @@ export default factories.createCoreService('api::subscription.subscription', ({ 
    */
   async calculateTotalRevenue(authorId: number): Promise<number> {
     const allSubscriptions = await strapi.entityService.findMany('api::subscription.subscription', {
-      filters: { author: authorId }
+      filters: { author: { id: authorId } }
     });
 
     return allSubscriptions.reduce((total, sub) => total + (sub.total_paid || 0), 0);
