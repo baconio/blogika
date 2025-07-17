@@ -60,12 +60,23 @@ export {
 // Хуки для поиска
 export {
   useSearch,
-  useTrendingSearches,
-  type SearchFilters,
-  type SearchResult,
-  type SearchSuggestion,
-  type UseSearchOptions
+  type UseSearchParams,
+  type UseSearchResult
 } from './useSearch';
+
+// Хук для аналитики
+export {
+  useAnalytics,
+  type UseAnalyticsParams,
+  type UseAnalyticsResult
+} from './useAnalytics';
+
+// Хук для рекомендаций
+export {
+  useRecommendations,
+  type UseRecommendationsParams,
+  type UseRecommendationsResult
+} from './useRecommendations';
 
 // Хук для отслеживания прогресса чтения
 export {

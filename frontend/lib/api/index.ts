@@ -22,6 +22,15 @@ export { categoriesApi } from './categories';
 // Tags API
 export { tagsApi } from './tags';
 
+// Search API
+export * as searchApi from './search';
+
+// Analytics API
+export * as analyticsApi from './analytics';
+
+// Recommendations API
+export * as recommendationsApi from './recommendations';
+
 /**
  * Объединенный API для удобного использования
  */
@@ -30,7 +39,10 @@ export const api = {
   comments: commentsApi,
   subscriptions: subscriptionsApi,
   categories: categoriesApi,
-  tags: tagsApi
+  tags: tagsApi,
+  search: searchApi,
+  analytics: analyticsApi,
+  recommendations: recommendationsApi
 } as const;
 
 /**

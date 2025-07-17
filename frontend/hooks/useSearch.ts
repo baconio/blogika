@@ -1,271 +1,199 @@
 /**
- * React хук для поиска с debounce
+ * React хук для поиска с Elasticsearch и debounce
  * @description Микромодуль для поиска контента с оптимизацией производительности
  */
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { articlesApi, categoriesApi, tagsApi } from '@/lib/api';
-import { trackEvent } from '@/lib/utils';
+import { searchApi } from '@/lib/api';
+import { analyticsApi } from '@/lib/api';
+import type { 
+  SearchParams, 
+  SearchResponse, 
+  AutocompleteResult 
+} from '@/types';
 
 export type Maybe<T> = T | undefined;
 
-export interface SearchFilters {
-  readonly category?: string;
-  readonly tags?: readonly string[];
-  readonly dateFrom?: Date;
-  readonly dateTo?: Date;
-  readonly sortBy?: 'relevance' | 'date' | 'views' | 'likes';
-  readonly contentType?: 'all' | 'articles' | 'authors' | 'tags';
-}
-
-export interface SearchResult {
-  readonly articles: readonly any[];
-  readonly authors: readonly any[];
-  readonly tags: readonly any[];
-  readonly categories: readonly any[];
-  readonly totalResults: number;
-  readonly searchTime: number;
-}
-
-export interface SearchSuggestion {
-  readonly text: string;
-  readonly type: 'article' | 'author' | 'tag' | 'category';
-  readonly count?: number;
-}
-
-export interface UseSearchOptions {
+/**
+ * Параметры хука useSearch
+ */
+export interface UseSearchParams {
+  /** Начальный поисковый запрос */
+  readonly initialQuery?: string;
+  /** Задержка debounce в миллисекундах */
   readonly debounceMs?: number;
-  readonly minQueryLength?: number;
-  readonly maxSuggestions?: number;
-  readonly enableHistory?: boolean;
-  readonly enableAutoComplete?: boolean;
+  /** Включено ли автодополнение */
+  readonly enableAutocomplete?: boolean;
+  /** Автоматический поиск при изменении query */
+  readonly autoSearch?: boolean;
 }
 
 /**
- * Хук для поиска с debounce и автодополнением
- * @param defaultFilters - фильтры по умолчанию
- * @param options - опции поиска
- * @returns объект с функциями поиска и состоянием
- * @example
- * const { query, setQuery, results, suggestions } = useSearch()
+ * Результат хука useSearch
  */
-export const useSearch = (
-  defaultFilters: SearchFilters = {},
-  options: UseSearchOptions = {}
-) => {
+export interface UseSearchResult {
+  /** Текущий поисковый запрос */
+  readonly query: string;
+  /** Установить поисковый запрос */
+  readonly setQuery: (query: string) => void;
+  /** Параметры поиска */
+  readonly searchParams: SearchParams;
+  /** Обновить параметры поиска */
+  readonly updateSearchParams: (params: Partial<SearchParams>) => void;
+  /** Выполнить поиск вручную */
+  readonly executeSearch: () => void;
+  /** Результаты поиска */
+  readonly searchResults: Maybe<SearchResponse>;
+  /** Загружается ли поиск */
+  readonly isSearching: boolean;
+  /** Ошибка поиска */
+  readonly searchError: Maybe<Error>;
+  /** Предложения автодополнения */
+  readonly autocompleteResults: readonly AutocompleteResult[];
+  /** Загружается ли автодополнение */
+  readonly isAutocompletingLoading: boolean;
+  /** Очистить результаты поиска */
+  readonly clearSearch: () => void;
+}
+
+/**
+ * Хук для поиска с Elasticsearch интеграцией
+ * @param params - параметры хука
+ * @returns функции и состояние поиска
+ */
+export const useSearch = (params: UseSearchParams = {}): UseSearchResult => {
   const {
+    initialQuery = '',
     debounceMs = 300,
-    minQueryLength = 2,
-    maxSuggestions = 5,
-    enableHistory = true,
-    enableAutoComplete = true
-  } = options;
+    enableAutocomplete = true,
+    autoSearch = true
+  } = params;
 
-  const [query, setQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [filters, setFilters] = useState<SearchFilters>(defaultFilters);
-  const [isTyping, setIsTyping] = useState(false);
+  // Состояние поиска
+  const [query, setQuery] = useState(initialQuery);
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
+  const [searchParams, setSearchParams] = useState<SearchParams>({
+    query: initialQuery,
+    page: 1,
+    limit: 20,
+    sortBy: 'relevance',
+    sortOrder: 'desc'
+  });
 
-  // Debounce поискового запроса
+  // Debounce для поискового запроса
   useEffect(() => {
-    setIsTyping(true);
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-      setIsTyping(false);
-      
-      // Трекинг поиска
-      if (query.length >= minQueryLength) {
-        trackEvent('search_performed', {
-          query,
-          filters,
-          queryLength: query.length
-        });
-      }
     }, debounceMs);
 
     return () => clearTimeout(timer);
-  }, [query, debounceMs, minQueryLength, filters]);
+  }, [query, debounceMs]);
+
+  // Обновляем параметры поиска при изменении query
+  useEffect(() => {
+    if (debouncedQuery !== searchParams.query) {
+      setSearchParams(prev => ({
+        ...prev,
+        query: debouncedQuery,
+        page: 1 // Сбрасываем страницу при новом поиске
+      }));
+    }
+  }, [debouncedQuery, searchParams.query]);
 
   // Основной поиск
-  const searchQuery = useQuery({
-    queryKey: ['search', 'content', debouncedQuery, filters],
-    queryFn: async (): Promise<SearchResult> => {
-      const startTime = performance.now();
-      
-      const [articles, authors, tags, categories] = await Promise.all([
-        articlesApi.search(debouncedQuery, filters),
-        // authorsApi.search(debouncedQuery),
-        // tagsApi.search(debouncedQuery),
-        // categoriesApi.search(debouncedQuery)
-        Promise.resolve([]), // Заглушки пока API не готовы
-        Promise.resolve([]),
-        Promise.resolve([])
-      ]);
-
-      const endTime = performance.now();
-      const searchTime = Math.round(endTime - startTime);
-
-      return {
-        articles,
-        authors,
-        tags,
-        categories,
-        totalResults: articles.length + authors.length + tags.length + categories.length,
-        searchTime
-      };
-    },
-    enabled: debouncedQuery.length >= minQueryLength,
-    staleTime: 2 * 60 * 1000, // 2 минуты
-    gcTime: 5 * 60 * 1000, // 5 минут в кэше
+  const {
+    data: searchResults,
+    isLoading: isSearching,
+    error: searchError,
+    refetch: executeSearch
+  } = useQuery({
+    queryKey: ['search', searchParams],
+    queryFn: () => searchApi.searchArticles(searchParams),
+    enabled: autoSearch && searchParams.query.length >= 2,
+    staleTime: 30000, // 30 секунд
+    retry: 2
   });
 
-  // Автодополнение/подсказки
-  const suggestionsQuery = useQuery({
-    queryKey: ['search', 'suggestions', debouncedQuery],
-    queryFn: async (): Promise<SearchSuggestion[]> => {
-      if (!enableAutoComplete) return [];
-      
-      // Получаем подсказки из разных источников
-      const suggestions: SearchSuggestion[] = [];
-      
-      // Подсказки статей
-      const articleSuggestions = await articlesApi.getSuggestions(debouncedQuery, 3);
-      suggestions.push(...articleSuggestions.map(article => ({
-        text: article.title,
-        type: 'article' as const,
-        count: article.views_count
-      })));
-
-      // Можно добавить подсказки тегов, авторов и т.д.
-      
-      return suggestions.slice(0, maxSuggestions);
-    },
-    enabled: enableAutoComplete && debouncedQuery.length >= 1 && debouncedQuery.length < minQueryLength,
-    staleTime: 5 * 60 * 1000, // 5 минут для подсказок
+  // Автодополнение
+  const {
+    data: autocompleteResults = [],
+    isLoading: isAutocompletingLoading
+  } = useQuery({
+    queryKey: ['autocomplete', debouncedQuery],
+    queryFn: () => searchApi.getAutocomplete(debouncedQuery, 5),
+    enabled: enableAutocomplete && debouncedQuery.length >= 2 && debouncedQuery.length <= 50,
+    staleTime: 60000, // 1 минута
+    retry: 1
   });
 
-  // История поиска
-  const searchHistory = useMemo(() => {
-    if (!enableHistory) return [];
-    
-    try {
-      const stored = localStorage.getItem('search_history');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
+  // Отправка аналитики поиска
+  useEffect(() => {
+    if (searchResults && searchParams.query.length >= 2) {
+      analyticsApi.trackEvent({
+        name: 'search_performed',
+        category: 'article',
+        properties: {
+          query: searchParams.query,
+          resultsCount: searchResults.totalCount,
+          searchTime: searchResults.searchTime,
+          filters: {
+            categories: searchParams.categories,
+            tags: searchParams.tags,
+            accessLevel: searchParams.accessLevel
+          }
+        },
+        timestamp: new Date()
+      }).catch(console.error);
     }
-  }, [enableHistory]);
+  }, [searchResults, searchParams]);
 
-  // Сохранение в историю
-  const saveToHistory = useCallback((searchQuery: string) => {
-    if (!enableHistory || searchQuery.length < minQueryLength) return;
-
-    try {
-      const history = searchHistory.filter(item => item !== searchQuery);
-      const newHistory = [searchQuery, ...history].slice(0, 10); // Максимум 10 записей
-      localStorage.setItem('search_history', JSON.stringify(newHistory));
-    } catch {
-      // Игнорируем ошибки localStorage
-    }
-  }, [enableHistory, minQueryLength, searchHistory]);
-
-  // Очистка истории
-  const clearHistory = useCallback(() => {
-    try {
-      localStorage.removeItem('search_history');
-    } catch {
-      // Игнорируем ошибки localStorage
-    }
-  }, []);
-
-  // Обработка отправки формы поиска
-  const handleSubmit = useCallback((searchQuery: string) => {
-    setQuery(searchQuery);
-    setDebouncedQuery(searchQuery);
-    saveToHistory(searchQuery);
-    
-    // Трекинг отправки поиска
-    trackEvent('search_submitted', {
-      query: searchQuery,
-      filters,
-      source: 'form_submit'
-    });
-  }, [filters, saveToHistory]);
-
-  // Быстрый поиск по категории
-  const searchByCategory = useCallback((categorySlug: string) => {
-    setFilters(prev => ({ ...prev, category: categorySlug }));
-    
-    trackEvent('search_filter_applied', {
-      filterType: 'category',
-      filterValue: categorySlug
-    });
-  }, []);
-
-  // Быстрый поиск по тегу
-  const searchByTag = useCallback((tagSlug: string) => {
-    setFilters(prev => ({
+  // Функции управления
+  const updateSearchParams = useCallback((params: Partial<SearchParams>) => {
+    setSearchParams(prev => ({
       ...prev,
-      tags: prev.tags ? [...prev.tags, tagSlug] : [tagSlug]
+      ...params,
+      query: prev.query // Сохраняем текущий query
     }));
-    
-    trackEvent('search_filter_applied', {
-      filterType: 'tag',
-      filterValue: tagSlug
-    });
   }, []);
 
-  // Сброс фильтров
-  const resetFilters = useCallback(() => {
-    setFilters(defaultFilters);
-    
-    trackEvent('search_filters_reset');
-  }, [defaultFilters]);
-
-  // Сброс всего поиска
-  const resetSearch = useCallback(() => {
+  const clearSearch = useCallback(() => {
     setQuery('');
     setDebouncedQuery('');
-    setFilters(defaultFilters);
-    
-    trackEvent('search_reset');
-  }, [defaultFilters]);
+    setSearchParams({
+      query: '',
+      page: 1,
+      limit: 20,
+      sortBy: 'relevance',
+      sortOrder: 'desc'
+    });
+  }, []);
 
-  return {
-    // Состояние поиска
+  return useMemo(() => ({
     query,
-    debouncedQuery,
-    filters,
-    isTyping,
-    isSearching: searchQuery.isFetching,
-    
-    // Результаты
-    results: searchQuery.data,
-    suggestions: suggestionsQuery.data || [],
-    searchHistory,
-    
-    // Статус загрузки и ошибки
-    isLoading: searchQuery.isLoading,
-    isError: searchQuery.isError,
-    error: searchQuery.error,
-    
-    // Функции управления
     setQuery,
-    setFilters,
-    handleSubmit,
-    searchByCategory,
-    searchByTag,
-    resetFilters,
-    resetSearch,
-    clearHistory,
-    
-    // Вспомогательные данные
-    hasResults: (searchQuery.data?.totalResults || 0) > 0,
-    isEmpty: debouncedQuery.length >= minQueryLength && (searchQuery.data?.totalResults || 0) === 0,
-    canSearch: query.length >= minQueryLength
-  };
+    searchParams,
+    updateSearchParams,
+    executeSearch,
+    searchResults,
+    isSearching,
+    searchError,
+    autocompleteResults,
+    isAutocompletingLoading,
+    clearSearch
+  }), [
+    query,
+    searchParams,
+    updateSearchParams,
+    executeSearch,
+    searchResults,
+    isSearching,
+    searchError,
+    autocompleteResults,
+    isAutocompletingLoading,
+    clearSearch
+  ]);
 };
 
 /**

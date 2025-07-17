@@ -102,4 +102,44 @@ export type {
   SocialCard,
   SEOUtils,
   SOCIAL_PLATFORMS_CONFIG
-} from './Components'; 
+} from './Components';
+
+// Search types
+export type {
+  SearchParams,
+  SearchResult,
+  SearchHighlight,
+  SearchResponse,
+  SearchFacets,
+  FacetItem,
+  AutocompleteResult
+} from './Search';
+
+// Analytics types
+export type {
+  ArticleMetrics,
+  ReadingAnalytics,
+  DeviceInfo,
+  InteractionEvent,
+  AuthorAnalytics,
+  AuthorDashboardData,
+  TimePeriod,
+  DailyMetrics,
+  TrafficSource,
+  TopicMetrics,
+  AnalyticsEvent
+} from './Analytics';
+
+// Recommendation types
+export type {
+  RecommendedArticle,
+  RecommendationReason,
+  RecommendationAlgorithm,
+  RecommendationParams,
+  RecommendationResult,
+  UserInterestProfile,
+  SimilarArticles,
+  AuthorRecommendation,
+  RecommendationExperiment,
+  PersonalizationSettings
+} from './Recommendation'; 
